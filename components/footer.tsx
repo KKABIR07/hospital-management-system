@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowUpRight, Mail, MapPin, Phone, Send, Siren } from "lucide-react";
 
 import {
@@ -26,9 +27,42 @@ const socials = [
   { label: "YouTube", href: siteConfig.social.youtube, Icon: YouTubeIcon },
 ];
 
+type SubscribeStatus = "idle" | "sending" | "sent" | "error";
+
 export function Footer() {
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [status, setStatus] = useState<SubscribeStatus>("idle");
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  async function handleSubscribe(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (status === "sending") return;
+
+    setStatus("sending");
+    setFeedback(null);
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = (await response.json()) as { ok: boolean; message?: string };
+
+      if (!response.ok || !data.ok) {
+        setFeedback(data.message ?? "Subscription failed. Please try again.");
+        setStatus("error");
+        return;
+      }
+
+      setEmail("");
+      setFeedback(data.message ?? "You're on the list — welcome to Aurora Health.");
+      setStatus("sent");
+    } catch {
+      setFeedback("Subscription failed. Please try again shortly.");
+      setStatus("error");
+    }
+  }
 
   return (
     <footer className="relative overflow-hidden bg-slate-950 text-white">
@@ -131,13 +165,7 @@ export function Footer() {
               reminders. No spam, unsubscribe anytime.
             </p>
 
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                setSubscribed(true);
-              }}
-              className="flex flex-col gap-3"
-            >
+            <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
               <label htmlFor="newsletter-email" className="sr-only">
                 Email address
               </label>
@@ -151,13 +179,32 @@ export function Footer() {
                   placeholder="you@email.com"
                   className="border-white/15 bg-white/10 text-white placeholder:text-white/40 focus:bg-white/15"
                 />
-                <Button type="submit" size="icon" aria-label="Subscribe to newsletter">
-                  <Send className="size-4" />
+                <Button
+                  type="submit"
+                  size="icon"
+                  aria-label="Subscribe to newsletter"
+                  disabled={status === "sending"}
+                >
+                  {status === "sending" ? (
+                    <motion.span
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+                      className="size-4 rounded-full border-2 border-white/40 border-t-white"
+                    />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
                 </Button>
               </div>
-              {subscribed && (
-                <p className="text-xs font-medium text-accent-400" role="status">
-                  You&apos;re on the list — welcome to Aurora Health.
+              {feedback && (
+                <p
+                  className={`text-xs font-medium ${
+                    status === "error" ? "text-danger-400" : "text-accent-400"
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {feedback}
                 </p>
               )}
             </form>

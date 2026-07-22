@@ -13,16 +13,52 @@ import { departments } from "@/lib/data";
 import { fullAddress, siteConfig } from "@/lib/site-config";
 import { toDialable } from "@/lib/utils";
 
-type FormStatus = "idle" | "sending" | "sent";
+type FormStatus = "idle" | "sending" | "sent" | "error";
+
+const DEFAULT_ERROR = "Something went wrong. Please call our front desk.";
 
 export function Contact() {
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (status === "sending") return;
+
+    const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form).entries());
+
     setStatus("sending");
-    // Wire this to your API route / CRM. Simulated here so the UI is complete.
-    setTimeout(() => setStatus("sent"), 900);
+    setFeedback(null);
+    setFieldErrors({});
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        message?: string;
+        errors?: Record<string, string>;
+      };
+
+      if (!response.ok || !data.ok) {
+        setFieldErrors(data.errors ?? {});
+        setFeedback(data.message ?? DEFAULT_ERROR);
+        setStatus("error");
+        return;
+      }
+
+      form.reset();
+      setFeedback(data.message ?? "Thank you — a patient coordinator will call you shortly.");
+      setStatus("sent");
+    } catch {
+      setFeedback(DEFAULT_ERROR);
+      setStatus("error");
+    }
   }
 
   return (
@@ -137,7 +173,16 @@ export function Contact() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="name">Full name</Label>
-                  <Input id="name" name="name" required autoComplete="name" placeholder="Jordan Ellis" />
+                  <Input
+                    id="name"
+                    name="name"
+                    required
+                    autoComplete="name"
+                    placeholder="Jordan Ellis"
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-describedby={fieldErrors.name ? "name-error" : undefined}
+                  />
+                  <FieldError id="name-error" message={fieldErrors.name} />
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone</Label>
@@ -148,7 +193,10 @@ export function Contact() {
                     required
                     autoComplete="tel"
                     placeholder="+1 555 010 2233"
+                    aria-invalid={Boolean(fieldErrors.phone)}
+                    aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
                   />
+                  <FieldError id="phone-error" message={fieldErrors.phone} />
                 </div>
               </div>
 
@@ -161,7 +209,10 @@ export function Contact() {
                   required
                   autoComplete="email"
                   placeholder="you@email.com"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 />
+                <FieldError id="email-error" message={fieldErrors.email} />
               </div>
 
               <div>
@@ -191,10 +242,18 @@ export function Contact() {
                   name="message"
                   required
                   placeholder="Tell us briefly about your symptoms or question…"
+                  aria-invalid={Boolean(fieldErrors.message)}
+                  aria-describedby={fieldErrors.message ? "message-error" : undefined}
                 />
+                <FieldError id="message-error" message={fieldErrors.message} />
               </div>
 
-              <Button type="submit" size="lg" disabled={status !== "idle"} className="w-full">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={status === "sending" || status === "sent"}
+                className="w-full"
+              >
                 {status === "sending" ? (
                   <>
                     <motion.span
@@ -206,6 +265,11 @@ export function Contact() {
                   </>
                 ) : status === "sent" ? (
                   <>Message sent — we&apos;ll be in touch</>
+                ) : status === "error" ? (
+                  <>
+                    <Send className="size-5" />
+                    Try again
+                  </>
                 ) : (
                   <>
                     <Send className="size-5" />
@@ -214,16 +278,34 @@ export function Contact() {
                 )}
               </Button>
 
-              <p className="text-center text-xs text-muted-foreground" role="status">
-                {status === "sent"
-                  ? "Thank you — a patient coordinator will call you shortly."
-                  : "For medical emergencies please call our 24×7 line instead of this form."}
+              <p
+                className={`text-center text-xs ${
+                  status === "sent"
+                    ? "text-accent-600 dark:text-accent-400"
+                    : status === "error"
+                      ? "text-danger-600 dark:text-danger-400"
+                      : "text-muted-foreground"
+                }`}
+                role="status"
+                aria-live="polite"
+              >
+                {feedback ??
+                  "For medical emergencies please call our 24×7 line instead of this form."}
               </p>
             </form>
           </Reveal>
         </div>
       </div>
     </section>
+  );
+}
+
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} className="mt-1.5 text-xs font-medium text-danger-600 dark:text-danger-400">
+      {message}
+    </p>
   );
 }
 
