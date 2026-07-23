@@ -124,6 +124,34 @@ export const services: Service[] = [
     description: "Level-1 trauma bay staffed round the clock with a 4-minute average response.",
     icon: Siren,
     gradient: "from-danger-500 to-danger-400",
+    tagline: "Fastest possible access when every second counts",
+    intent:
+      "Built for speed and clarity under stress — minimal reading, maximum one-tap action. Reachable from the sticky red banner on every page, not just the main menu.",
+    emphasis: "speed",
+    accent: "danger",
+    highlights: ["Trauma", "Cardiac", "Stroke", "Poisoning", "Pediatric ER"],
+    content: [
+      "Live ER status badge — Normal / Busy / Critical",
+      "One-tap “Call Emergency” and “Request Ambulance” buttons",
+      "Emergency specialties: trauma, cardiac, stroke, poisoning, pediatric ER",
+      "Map with the fastest driving route to the ER entrance",
+      "“What to bring” checklist — ID, medical history, medication list",
+    ],
+    features: [
+      "Real-time ER load & average wait-time widget",
+      "Symptom-based triage checklist (informational, not diagnostic)",
+      "Direct ambulance dispatch trigger from the same screen",
+      "Sticky, pulsing red contact strip visible site-wide",
+      "Multi-language toggle for non-native speakers in crisis",
+    ],
+    layers: {
+      frontend:
+        "Sticky site-wide banner + dedicated ER landing page; tel: links for one-tap calling; live, colour-coded status badge (green / amber / red).",
+      backend:
+        "REST/WebSocket feed from the ER management system pushing live status, bed count and wait time every 30–60 seconds.",
+      integrations:
+        "Google Maps Directions API for the fastest route; SMS/WhatsApp gateway alerts on-call ER staff when an ambulance is requested.",
+    },
   },
   {
     id: "icu",
@@ -131,6 +159,33 @@ export const services: Service[] = [
     description: "47 critical-care beds with continuous monitoring and 1:1 nursing.",
     icon: Activity,
     gradient: "from-primary-600 to-primary-400",
+    tagline: "Critical care transparency & family confidence",
+    intent:
+      "Balances clinical credibility — equipment and specialists — with human warmth: visiting rules, live updates and plain-language guidance for anxious families.",
+    emphasis: "explore",
+    accent: "primary",
+    highlights: ["Medical", "Surgical", "Neonatal", "Cardiac"],
+    content: [
+      "Live bed availability by ICU type — Medical, Surgical, Neonatal, Cardiac",
+      "Equipment & capability highlights — ventilators, monitoring, isolation bays",
+      "Visiting hours, family protocol and infection-control guidelines",
+      "Admission criteria & referral process explained in plain language",
+      "Direct link into the Virtual Hospital Tour ICU scene",
+    ],
+    features: [
+      "On-duty intensivist / specialist roster shown live",
+      "Downloadable “What to Expect in the ICU” PDF guide",
+      "Opt-in WhatsApp/SMS status updates for registered family",
+      "Direct line to the ICU nursing station, separate from the ER line",
+    ],
+    layers: {
+      frontend:
+        "Colour-coded bed-status grid per ICU type; collapsible visiting-protocol FAQ; PDF viewer / download.",
+      backend:
+        "Bed-management integration (HL7/FHIR feed) for live occupancy; staff roster synced from HR / scheduling.",
+      integrations:
+        "WhatsApp Business API / SMS gateway for opted-in family updates, gated by patient-linked consent and authentication.",
+    },
   },
   {
     id: "surgery",
@@ -138,6 +193,33 @@ export const services: Service[] = [
     description: "Robot-assisted and minimally invasive theatres with same-day recovery.",
     icon: ClipboardPlus,
     gradient: "from-accent-600 to-accent-400",
+    tagline: "Specialty discovery, surgeon trust & consult booking",
+    intent:
+      "Turns research into a booked consultation — leading with surgical specialties, building trust through surgeon credentials, and removing cost-uncertainty with an estimator.",
+    emphasis: "explore",
+    accent: "accent",
+    highlights: ["General", "Cardiac", "Orthopedic", "Neuro", "Laparoscopic", "Cosmetic"],
+    content: [
+      "Grid of surgical specialties — General, Cardiac, Orthopedic, Neuro, Laparoscopic, Cosmetic",
+      "Surgeon profile cards — experience, qualifications, procedures performed",
+      "OT technology highlights — robotic-assisted, minimally invasive equipment",
+      "Pre-op and post-op care guides per procedure type",
+      "Patient testimonials specific to surgical outcomes",
+    ],
+    features: [
+      "“Request a Surgical Consultation” form routed to the specialty team",
+      "Approximate cost estimator (range-based, with a clear disclaimer)",
+      "Downloadable pre-operative checklist and fasting instructions",
+      "Filter surgeons by specialty, experience and next availability",
+    ],
+    layers: {
+      frontend:
+        "Filterable surgeon directory (specialty / experience / availability); multi-step consultation request form; cost-estimator with input sliders.",
+      backend:
+        "Doctor/booking API shared with the Doctors section; admin-maintained pricing rules engine for the estimator (not hard-coded).",
+      integrations:
+        "CRM / lead-routing so requests reach the correct department inbox; e-signature / consent-form tool for pre-admission paperwork.",
+    },
   },
   {
     id: "pathology",
@@ -145,6 +227,32 @@ export const services: Service[] = [
     description: "NABL-accredited labs returning most reports within four hours.",
     icon: Microscope,
     gradient: "from-primary-500 to-accent-500",
+    tagline: "Lab test booking, home collection & digital reports",
+    intent:
+      "A high-frequency, transactional service — closer to a mini e-commerce + portal experience. Find a test, book collection, and get the report with minimal friction.",
+    emphasis: "transactional",
+    accent: "primary",
+    highlights: ["CBC", "Lipid profile", "Thyroid", "Home collection"],
+    content: [
+      "Searchable test / panel catalog with pricing — CBC, lipid profile, thyroid…",
+      "Home sample-collection scheduler — address, date, time slot",
+      "Turnaround-time indicator per test",
+      "Lab accreditation badges — NABL / ISO or regional equivalent",
+    ],
+    features: [
+      "Cart-style flow: search → add to cart → schedule collection → pay",
+      "Secure patient portal to view / download reports as PDF",
+      "SMS / email the moment a report is ready",
+      "Repeat / recurring test scheduling for chronic-care patients",
+    ],
+    layers: {
+      frontend:
+        "Test catalog with search / filter and cart; slot-picker calendar for home collection; authenticated report portal with PDF viewer.",
+      backend:
+        "Integration with the hospital LIMS for order creation, sample tracking and report retrieval.",
+      integrations:
+        "Payment gateway for prepaid tests; SMS / email report-ready alerts; OTP-based patient authentication for report access.",
+    },
   },
   {
     id: "pharmacy",
@@ -152,6 +260,32 @@ export const services: Service[] = [
     description: "24×7 in-house pharmacy with insurance-linked billing and home delivery.",
     icon: Pill,
     gradient: "from-accent-500 to-primary-400",
+    tagline: "Prescription ordering & medicine delivery",
+    intent:
+      "Supports both walk-in browsing and prescription-based ordering, with delivery for patients who cannot easily visit in person.",
+    emphasis: "transactional",
+    accent: "accent",
+    highlights: ["24×7", "Prescription upload", "Home delivery", "Refill reminders"],
+    content: [
+      "Medicine search / catalog with generic & brand names",
+      "Prescription upload area — photo or PDF",
+      "24/7 availability badge and nearest-branch locator",
+      "Refill reminder sign-up for chronic medication",
+    ],
+    features: [
+      "Prescription upload with pharmacist verification before dispatch",
+      "Cart & checkout with delivery or in-store pickup",
+      "Live order tracking — Confirmed → Packed → Out for Delivery → Delivered",
+      "Automated refill reminders based on the prescribed dosage cycle",
+    ],
+    layers: {
+      frontend:
+        "Product catalog + cart / checkout (e-commerce pattern); drag-and-drop prescription upload; order-tracking timeline.",
+      backend:
+        "Pharmacy inventory integration for real-time stock; prescription-verification queue for licensed pharmacist review.",
+      integrations:
+        "Payment gateway; delivery / logistics API (own fleet or courier); SMS notifications on status changes.",
+    },
   },
   {
     id: "ambulance",
@@ -159,6 +293,32 @@ export const services: Service[] = [
     description: "GPS-tracked advanced life-support fleet with paramedics on board.",
     icon: Ambulance,
     gradient: "from-danger-500 to-primary-500",
+    tagline: "One-tap dispatch with live GPS tracking",
+    intent:
+      "Like Emergency Care, this page prioritises speed of action over information density. The one job: get a vehicle moving toward the patient in seconds.",
+    emphasis: "speed",
+    accent: "danger",
+    highlights: ["Basic", "ICU-equipped", "Neonatal"],
+    content: [
+      "One-tap “Request Ambulance” button — auto-detects location",
+      "Fleet types — Basic, ICU-equipped, Neonatal",
+      "Coverage-area map and approximate response time by zone",
+      "Fare estimate before confirming dispatch",
+    ],
+    features: [
+      "Live GPS tracking of the dispatched ambulance on a map",
+      "Driver name, photo and contact shown after dispatch",
+      "ETA countdown with push / SMS updates",
+      "Dispatch confirmation with a shareable tracking link for family",
+    ],
+    layers: {
+      frontend:
+        "Geolocation-based request button; live map (driver marker + route) like ride-hailing apps; shareable tracking-link page.",
+      backend:
+        "Dispatch system matching the nearest available vehicle; GPS / telematics feed from ambulance fleet devices.",
+      integrations:
+        "Maps SDK for live tracking; SMS / push for ETA updates; call routing to connect the requester with the assigned driver.",
+    },
   },
   {
     id: "maternity",
@@ -166,6 +326,32 @@ export const services: Service[] = [
     description: "Birthing suites, neonatal ICU and lactation support for every family.",
     icon: Baby,
     gradient: "from-accent-400 to-primary-400",
+    tagline: "Packages, birthing options & the prenatal journey",
+    intent:
+      "Expecting parents plan months ahead, so this page is exploratory and reassuring — comparing packages, meeting doctors, and understanding the journey from prenatal to postnatal care.",
+    emphasis: "explore",
+    accent: "accent",
+    highlights: ["Normal Delivery", "C-Section", "Premium Suite"],
+    content: [
+      "Maternity package comparison — Normal Delivery, C-Section, Premium Suite",
+      "Birthing suite & NICU virtual-tour link",
+      "Obstetrician / gynaecologist profiles with delivery experience",
+      "Prenatal and postnatal care programme overview",
+    ],
+    features: [
+      "Due-date calculator as an engagement widget",
+      "Antenatal class schedule with online booking",
+      "Package cost comparison table with inclusions / exclusions",
+      "NICU readiness information for high-risk pregnancies",
+    ],
+    layers: {
+      frontend:
+        "Due-date calculator (date input + logic); package comparison table; class-booking calendar.",
+      backend:
+        "Package / pricing data via an admin CMS so staff can update without a developer; class booking synced with the appointment API.",
+      integrations:
+        "Shared booking engine with the Doctors and AI Appointment modules; optional pregnancy-tracking email / SMS drip campaign.",
+    },
   },
   {
     id: "diagnostics",
@@ -173,6 +359,32 @@ export const services: Service[] = [
     description: "3T MRI, 256-slice CT and digital imaging read by on-site radiologists.",
     icon: Scan,
     gradient: "from-primary-500 to-primary-700",
+    tagline: "Imaging & test booking with digital report access",
+    intent:
+      "Covers imaging modalities distinct from Pathology’s lab-sample tests. The focus: scheduling equipment time slots and delivering large report / image files securely.",
+    emphasis: "transactional",
+    accent: "primary",
+    highlights: ["X-ray", "MRI", "CT Scan", "Ultrasound", "ECG", "Mammography"],
+    content: [
+      "Modality list — X-ray, MRI, CT, Ultrasound, ECG, Mammography",
+      "Equipment / technology highlights — 3T MRI, low-dose CT",
+      "Preparation instructions per test — fasting, hydration, clothing",
+      "Appointment slot availability by modality and location",
+    ],
+    features: [
+      "Search / filter by modality, body part or referring symptom",
+      "Online booking tied to equipment scheduling",
+      "Downloadable prep-instruction sheet sent after booking",
+      "Secure report / image portal for viewing and downloading results",
+    ],
+    layers: {
+      frontend:
+        "Modality search / filter grid; slot-based appointment calendar; authenticated portal for report / image retrieval.",
+      backend:
+        "RIS for scheduling equipment time; PACS integration for storing and serving diagnostic images / reports.",
+      integrations:
+        "OTP-based authentication for the report portal; SMS / email when results are ready; shared booking engine with the AI Appointment module.",
+    },
   },
 ];
 

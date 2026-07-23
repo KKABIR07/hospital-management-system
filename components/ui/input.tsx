@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const fieldStyles =
-  "w-full rounded-2xl border border-border bg-surface/60 px-4 py-3 text-sm text-foreground shadow-sm outline-none backdrop-blur-sm transition-all duration-300 placeholder:text-muted-foreground/70 hover:border-primary-500/40 focus:border-primary-500 focus:bg-surface focus:shadow-[0_0_0_4px_rgba(14,165,233,0.14)]";
+  "w-full rounded-2xl border border-border bg-surface/60 px-4 py-3 text-sm text-foreground shadow-sm outline-none backdrop-blur-sm transition-all duration-300 placeholder:text-muted-foreground/70 hover:border-primary-500/40 focus:border-primary-500 focus:bg-surface focus:shadow-[0_0_0_4px_rgba(21,101,192,0.14)]";
 
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type = "text", ...props }, ref) => (

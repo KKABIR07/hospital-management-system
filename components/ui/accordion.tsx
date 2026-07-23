@@ -15,7 +15,7 @@ const AccordionItem = React.forwardRef<
   <AccordionPrimitive.Item
     ref={ref}
     className={cn(
-      "glass gradient-ring overflow-hidden rounded-3xl px-6 transition-all duration-500 data-[state=open]:shadow-[0_28px_60px_-28px_rgba(14,165,233,0.55)]",
+      "glass gradient-ring overflow-hidden rounded-3xl px-6 transition-all duration-500 data-[state=open]:shadow-[0_28px_60px_-28px_rgba(21,101,192,0.55)]",
       className,
     )}
     {...props}

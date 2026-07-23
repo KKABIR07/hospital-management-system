@@ -127,7 +127,7 @@ export function Footer() {
                 (link) => (
                   <li key={link.label}>
                     <Link
-                      href={link.href}
+                      href={link.href.startsWith("#") ? `/${link.href}` : link.href}
                       className="group inline-flex items-center gap-1.5 transition-colors hover:text-white"
                     >
                       {link.label}
@@ -146,7 +146,7 @@ export function Footer() {
               {services.map((service) => (
                 <li key={service.id}>
                   <Link
-                    href="#services"
+                    href={`/services/${service.id}`}
                     className="group inline-flex items-center gap-1.5 transition-colors hover:text-white"
                   >
                     {service.title}
@@ -247,7 +247,7 @@ export function Footer() {
               </a>
             </li>
             <li>
-              <Link href="#faq" className="hover:text-white">
+              <Link href="/#faq" className="hover:text-white">
                 Privacy &amp; Patient Rights
               </Link>
             </li>

@@ -97,7 +97,7 @@ export function VirtualTour() {
                     aria-pressed={isActive}
                     className={cn(
                       "glass gradient-ring group flex w-full items-center gap-4 rounded-3xl p-3.5 text-left transition-all duration-400",
-                      isActive && "shadow-[0_24px_50px_-24px_rgba(14,165,233,0.7)]",
+                      isActive && "shadow-[0_24px_50px_-24px_rgba(21,101,192,0.7)]",
                     )}
                   >
                     <span className="relative size-16 shrink-0 overflow-hidden rounded-2xl">

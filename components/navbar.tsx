@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { CalendarDays, Menu, Phone, X } from "lucide-react";
+import { CalendarDays, LogIn, Menu, Phone, UserRound, X } from "lucide-react";
 
 import { Logo } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -88,6 +88,22 @@ export function Navbar() {
                 </span>
                 {siteConfig.emergencyPhone}
               </a>
+
+              <Link
+                href="/login/patient"
+                className="hidden items-center gap-2 rounded-full border border-primary-500/30 bg-primary-500/10 px-4 py-2.5 text-sm font-semibold text-primary-600 backdrop-blur-md transition-all duration-300 hover:bg-primary-500/20 lg:inline-flex dark:text-primary-300"
+              >
+                <UserRound className="size-4" />
+                Patient Login
+              </Link>
+
+              <Link
+                href="/login"
+                className="hidden items-center gap-2 rounded-full border border-border bg-surface/70 px-4 py-2.5 text-sm font-semibold text-muted-foreground backdrop-blur-md transition-all duration-300 hover:border-primary-500/50 hover:text-primary-600 xl:inline-flex dark:hover:text-primary-300"
+              >
+                <LogIn className="size-4" />
+                Staff Login
+              </Link>
 
               <ThemeToggle />
 
@@ -183,6 +199,24 @@ export function Navbar() {
                     Emergency Call
                   </a>
                 </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href="/login/patient"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-primary-500/30 bg-primary-500/10 px-4 py-3 text-sm font-semibold text-primary-600 transition-colors hover:bg-primary-500/20 dark:text-primary-300"
+                  >
+                    <UserRound className="size-4" />
+                    Patient
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <LogIn className="size-4" />
+                    Staff
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </motion.div>

@@ -51,7 +51,7 @@ export function WhatsAppIcon({ className, ...props }: IconProps) {
 export function Logo({ className }: { className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <span className="relative grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-[0_10px_26px_-10px_rgba(14,165,233,0.9)]">
+      <span className="relative grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-[0_10px_26px_-10px_rgba(21,101,192,0.9)]">
         <svg viewBox="0 0 24 24" className="size-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M12 5v14M5 12h14" />
         </svg>

@@ -12,7 +12,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white shadow-[0_18px_40px_-16px_rgba(14,165,233,0.9)] hover:shadow-[0_26px_60px_-18px_rgba(14,165,233,1)] hover:-translate-y-0.5 active:translate-y-0",
+          "bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white shadow-[0_18px_40px_-16px_rgba(21,101,192,0.9)] hover:shadow-[0_26px_60px_-18px_rgba(21,101,192,1)] hover:-translate-y-0.5 active:translate-y-0",
         emergency:
           "bg-gradient-to-r from-danger-600 to-danger-500 text-white shadow-[0_18px_40px_-16px_rgba(239,68,68,0.9)] hover:shadow-[0_26px_60px_-18px_rgba(239,68,68,1)] hover:-translate-y-0.5 active:translate-y-0",
         glass:

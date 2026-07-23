@@ -25,7 +25,7 @@ export function SmartImage({ className, fallbackLabel, alt, ...props }: SmartIma
       <span
         aria-hidden
         className={cn(
-          "absolute inset-0 bg-[linear-gradient(135deg,#0ea5e9_0%,#0284c7_38%,#10b981_100%)] transition-opacity duration-700",
+          "absolute inset-0 bg-[linear-gradient(135deg,#1565c0_0%,#1258a8_38%,#10b981_100%)] transition-opacity duration-700",
           status === "ready" ? "opacity-0" : "opacity-100",
         )}
       >

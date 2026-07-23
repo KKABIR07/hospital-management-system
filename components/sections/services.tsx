@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -32,6 +33,11 @@ export function Services() {
                 transition={{ type: "spring", stiffness: 300, damping: 22 }}
                 className="glass gradient-ring group relative flex h-full flex-col overflow-hidden rounded-4xl p-7"
               >
+                <Link
+                  href={`/services/${service.id}`}
+                  className="absolute inset-0 z-20"
+                  aria-label={`${service.title} — view details`}
+                />
                 <span
                   aria-hidden
                   className={cn(
@@ -47,7 +53,7 @@ export function Services() {
                     transition={{ type: "spring", stiffness: 260, damping: 18 }}
                     className={cn(
                       "relative grid size-16 place-items-center rounded-3xl bg-gradient-to-br text-white",
-                      "shadow-[0_18px_36px_-14px_rgba(14,165,233,0.75)] transition-shadow duration-500 group-hover:shadow-[0_28px_50px_-16px_rgba(14,165,233,0.95)]",
+                      "shadow-[0_18px_36px_-14px_rgba(21,101,192,0.75)] transition-shadow duration-500 group-hover:shadow-[0_28px_50px_-16px_rgba(21,101,192,0.95)]",
                       service.gradient,
                     )}
                     style={{ transformStyle: "preserve-3d" }}

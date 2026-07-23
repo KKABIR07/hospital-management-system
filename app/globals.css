@@ -44,17 +44,17 @@
 }
 
 @theme {
-  /* Medical blue */
-  --color-primary-50: #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #0ea5e9;
-  --color-primary-600: #0284c7;
-  --color-primary-700: #0369a1;
-  --color-primary-800: #075985;
-  --color-primary-900: #0c4a6e;
+  /* Medical blue — anchored on brand hex #1565C0 at the 500 step */
+  --color-primary-50: #e8f2fc;
+  --color-primary-100: #c8def6;
+  --color-primary-200: #96c0eb;
+  --color-primary-300: #639ede;
+  --color-primary-400: #367fd0;
+  --color-primary-500: #1565c0;
+  --color-primary-600: #1258a8;
+  --color-primary-700: #0f488a;
+  --color-primary-800: #0b396e;
+  --color-primary-900: #082a52;
 
   /* Emerald green */
   --color-accent-50: #ecfdf5;
@@ -75,7 +75,7 @@
   --radius-4xl: 1.75rem;
   --radius-5xl: 2.25rem;
 
-  --shadow-glow: 0 0 0 1px rgba(14, 165, 233, 0.18), 0 20px 50px -18px rgba(14, 165, 233, 0.55);
+  --shadow-glow: 0 0 0 1px rgba(21, 101, 192, 0.18), 0 20px 50px -18px rgba(21, 101, 192, 0.55);
   --shadow-lift: 0 30px 60px -24px rgba(15, 23, 42, 0.35);
 
   --animate-float: float 7s ease-in-out infinite;
@@ -173,7 +173,7 @@
   }
 
   ::selection {
-    background: rgba(14, 165, 233, 0.25);
+    background: rgba(21, 101, 192, 0.25);
   }
 
   :focus-visible {
@@ -274,7 +274,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(140deg, rgba(14, 165, 233, 0.65), rgba(16, 185, 129, 0.35), transparent 65%);
+  background: linear-gradient(140deg, rgba(21, 101, 192, 0.65), rgba(16, 185, 129, 0.35), transparent 65%);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);

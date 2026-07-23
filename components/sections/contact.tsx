@@ -221,7 +221,7 @@ export function Contact() {
                   id="department"
                   name="department"
                   defaultValue=""
-                  className="w-full rounded-2xl border border-border bg-surface/60 px-4 py-3 text-sm text-foreground shadow-sm outline-none backdrop-blur-sm transition-all duration-300 hover:border-primary-500/40 focus:border-primary-500 focus:bg-surface focus:shadow-[0_0_0_4px_rgba(14,165,233,0.14)]"
+                  className="w-full rounded-2xl border border-border bg-surface/60 px-4 py-3 text-sm text-foreground shadow-sm outline-none backdrop-blur-sm transition-all duration-300 hover:border-primary-500/40 focus:border-primary-500 focus:bg-surface focus:shadow-[0_0_0_4px_rgba(21,101,192,0.14)]"
                 >
                   <option value="" disabled>
                     Select a department
