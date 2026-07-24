@@ -63,12 +63,19 @@ export interface Feature {
   gradient: string;
 }
 
+export interface VideoSource {
+  src: string;
+  type: string;
+}
+
 export interface TourStop {
   id: string;
   title: string;
   description: string;
   duration: string;
   image: string;
+  /** Inline clip, best format first. Without it the stop stays a still photo. */
+  video?: readonly VideoSource[];
 }
 
 export interface Doctor {

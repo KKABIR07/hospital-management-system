@@ -57,3 +57,12 @@ export const heroVideoSources = [
   { src: "/videos/hero.webm", type: "video/webm" },
   { src: "/videos/hero.mp4", type: "video/mp4" },
 ];
+
+/**
+ * Virtual-tour clips. Same convention as the hero video: drop the files in
+ * `public/videos/tour/` and that stop plays inline. When a file is missing the
+ * stop silently stays a still photograph, so the section never breaks.
+ */
+export const tourVideoSources = {
+  reception: [{ src: "/videos/tour/reception.mp4", type: "video/mp4" }],
+} as const;

@@ -23,7 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 
-import { images } from "@/lib/images";
+import { images, tourVideoSources } from "@/lib/images";
 import type {
   Department,
   Doctor,
@@ -444,42 +444,43 @@ export const tourStops: TourStop[] = [
     id: "reception",
     title: "360° Reception",
     description: "Step into the atrium and see how fast check-in really works.",
-    duration: "1:40",
+    duration: "0:12",
     image: images.tour.reception,
+    video: tourVideoSources.reception,
   },
   {
     id: "icu",
     title: "Intensive Care Unit",
     description: "Continuous monitoring, isolation pods and 1:1 critical nursing.",
-    duration: "2:15",
+    duration: "0:28",
     image: images.tour.icu,
   },
   {
     id: "theatre",
     title: "Operation Theatre",
     description: "Laminar-flow modular theatres built for robot-assisted surgery.",
-    duration: "2:48",
+    duration: "0:30",
     image: images.tour.theatre,
   },
   {
     id: "rooms",
     title: "Patient Rooms",
     description: "Private and deluxe suites with attendant beds and smart controls.",
-    duration: "1:55",
+    duration: "0:26",
     image: images.tour.rooms,
   },
   {
     id: "mri",
     title: "MRI Room",
     description: "3T wide-bore MRI with noise reduction and paediatric comfort mode.",
-    duration: "1:20",
+    duration: "0:22",
     image: images.tour.mri,
   },
   {
     id: "laboratory",
     title: "Laboratory",
     description: "Fully automated analysers processing 4,000+ samples every day.",
-    duration: "2:05",
+    duration: "0:25",
     image: images.tour.laboratory,
   },
 ];
