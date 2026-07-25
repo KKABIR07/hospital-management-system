@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LayoutDashboard, LogOut, Sparkles } from "lucide-react";
+import { LayoutDashboard, Sparkles } from "lucide-react";
 
 import { Logo } from "@/components/icons";
 import { PatientDashboard } from "@/components/patient-dashboard";
+import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { getPortalRole, portalRoles } from "@/lib/portal";
 import { cn } from "@/lib/utils";
@@ -65,12 +66,7 @@ export default async function PortalDashboardPage({
             </span>
           </div>
 
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/login/${role.id}`}>
-              <LogOut className="size-4" />
-              Sign out
-            </Link>
-          </Button>
+          <SignOutButton role={role.id} />
         </div>
       </header>
 

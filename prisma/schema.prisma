@@ -1,0 +1,187 @@
+// Aurora Health — data model.
+//
+// Provider is MongoDB (Atlas). MongoDB with Prisma requires a replica set,
+// which every Atlas cluster provides by default. There are no SQL migrations:
+// evolve the schema with `npm run db:push` (see prisma/README.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/// A submitted contact / enquiry form. Backs POST /api/contact.
+model Contact {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  email      String
+  phone      String
+  department String?
+  message    String
+  createdAt  DateTime @default(now())
+
+  @@index([email])
+  @@map("contacts")
+}
+
+/// A newsletter opt-in. Backs POST /api/newsletter. Email is unique so a repeat
+/// subscribe is idempotent rather than a duplicate row.
+model NewsletterSubscriber {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("newsletter_subscribers")
+}
+
+enum AppointmentMode {
+  IN_PERSON
+  VIDEO_CONSULT
+  LAB_VISIT
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+/// A booked appointment. Created from the AI booking flow / portal and shown in
+/// the patient dashboard. `patientId` is optional so a guest booking (name +
+/// contact only, no account yet) is still valid.
+model Appointment {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  patient    Patient?          @relation(fields: [patientId], references: [id])
+  patientId  String?           @db.ObjectId
+  doctor     String
+  department String
+  // Appointment start as a real timestamp — format for display in the UI, not here.
+  scheduledAt DateTime
+  mode       AppointmentMode   @default(IN_PERSON)
+  status     AppointmentStatus @default(PENDING)
+  // Contact details captured at booking time (guest or account holder).
+  patientName String
+  email       String?
+  phone       String?
+  notes       String?
+  createdAt   DateTime         @default(now())
+
+  @@index([patientId])
+  @@index([scheduledAt])
+  @@map("appointments")
+}
+
+/// A patient record. `mrn` (medical record number, e.g. "PT-48210") is the
+/// human-facing id surfaced in the portal; `id` is the internal ObjectId.
+model Patient {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  mrn          String        @unique
+  name         String
+  phone        String?
+  email        String?
+  memberSince  String?
+  appointments Appointment[]
+  visits       Visit[]
+  invoices     Invoice[]
+  user         User?
+  createdAt    DateTime      @default(now())
+
+  @@map("patients")
+}
+
+/// A completed visit in a patient's history.
+model Visit {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId   String   @db.ObjectId
+  visitedAt   DateTime
+  doctor      String
+  department  String
+  summary     String
+  reportReady Boolean  @default(false)
+
+  @@index([patientId])
+  @@map("visits")
+}
+
+enum InvoiceStatus {
+  PAID
+  DUE
+}
+
+/// A billing line item on a patient's account.
+model Invoice {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  patient     Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId   String        @db.ObjectId
+  // Human-facing invoice number, e.g. "INV-20482".
+  reference   String        @unique
+  issuedAt    DateTime
+  description String
+  // Amount in whole currency units (USD). Use cents if you later need sub-unit precision.
+  amount      Float
+  status      InvoiceStatus @default(DUE)
+
+  @@index([patientId])
+  @@map("invoices")
+}
+
+enum UserRole {
+  PATIENT
+  DOCTOR
+  PATHOLOGY
+  LAB
+  ADMIN
+}
+
+/// A portal login. `passwordHash` is a bcrypt hash — never store plaintext.
+/// A PATIENT user optionally links to their Patient record.
+///
+/// `phone` is the login identity for patients who sign in via SMS OTP (E.164,
+/// e.g. "+919083389670"). Uniqueness is enforced in application code rather than
+/// a DB `@unique`: on MongoDB a unique index rejects multiple documents with a
+/// null value, and staff accounts have no phone.
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  phone        String?
+  name         String
+  passwordHash String
+  role         UserRole @default(PATIENT)
+  patient      Patient? @relation(fields: [patientId], references: [id])
+  patientId    String?  @unique @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([phone])
+  @@map("users")
+}
+
+/// A short-lived SMS one-time-passcode challenge. The code itself is never
+/// stored — only a bcrypt hash of it — so a database leak can't reveal live
+/// codes. Rows are matched by `phone` (E.164), expire after a few minutes, and
+/// are flagged `consumed` once used. `attempts` caps brute-force guessing.
+///
+/// `consumed` is a boolean (not a nullable timestamp) on purpose: on MongoDB a
+/// `{ field: null }` filter does not match documents where an optional field was
+/// never written, so a nullable "consumedAt" would make the "still-live" lookup
+/// silently miss fresh challenges. A defaulted boolean is always present and
+/// matches reliably. `consumedAt` keeps the audit timestamp.
+model OtpChallenge {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  phone      String
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumed   Boolean   @default(false)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone])
+  @@index([expiresAt])
+  @@map("otp_challenges")
+}

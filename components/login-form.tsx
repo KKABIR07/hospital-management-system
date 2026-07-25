@@ -141,7 +141,8 @@ function StaffCredentials({ role, accent }: { role: PortalRole; accent: Accent }
 }
 
 /* ------------------------------------------------------------------ *
- * Patient — phone number + OTP (demo only, no SMS is sent)
+ * Patient — phone number + real SMS OTP
+ * (POST /api/auth/otp/request → /api/auth/otp/verify)
  * ------------------------------------------------------------------ */
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
@@ -155,6 +156,8 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
+  // Set only when the server runs without an SMS provider key (local dev).
+  const [devCode, setDevCode] = useState<string | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const phoneDigits = phone.replace(/\D/g, "");
@@ -169,42 +172,90 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
     return () => window.clearInterval(timer);
   }, [seconds]);
 
-  function sendOtp(event?: React.FormEvent) {
+  /** Request (or resend) a code for the entered number. */
+  async function requestCode(): Promise<boolean> {
+    try {
+      const res = await fetch("/api/auth/otp/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setError(data?.message ?? "Couldn't send the code. Please try again.");
+        return false;
+      }
+      setDevCode(typeof data.devCode === "string" ? data.devCode : null);
+      return true;
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+      return false;
+    }
+  }
+
+  async function sendOtp(event?: React.FormEvent) {
     event?.preventDefault();
+    if (sending) return;
     if (!phoneValid) {
       setError("Enter a valid mobile number.");
       return;
     }
     setError(null);
     setSending(true);
-    // Demo: no SMS is sent — we simply advance to the code step.
-    window.setTimeout(() => {
-      setSending(false);
-      setStep("otp");
-      setSeconds(RESEND_SECONDS);
-      setOtp(Array(OTP_LENGTH).fill(""));
-      window.setTimeout(() => inputsRef.current[0]?.focus(), 60);
-    }, 700);
+    const ok = await requestCode();
+    setSending(false);
+    if (!ok) return;
+    setStep("otp");
+    setSeconds(RESEND_SECONDS);
+    setOtp(Array(OTP_LENGTH).fill(""));
+    window.setTimeout(() => inputsRef.current[0]?.focus(), 60);
   }
 
-  function resend() {
-    if (seconds > 0) return;
+  async function resend() {
+    if (seconds > 0 || sending) return;
     setError(null);
+    setSending(true);
+    const ok = await requestCode();
+    setSending(false);
+    if (!ok) return;
     setSeconds(RESEND_SECONDS);
     setOtp(Array(OTP_LENGTH).fill(""));
     inputsRef.current[0]?.focus();
   }
 
-  function verify(event?: React.FormEvent) {
+  async function verify(event?: React.FormEvent) {
     event?.preventDefault();
+    if (verifying) return;
     if (!otpValid) {
       setError("Enter the 6-digit code.");
       return;
     }
     setError(null);
     setVerifying(true);
-    // Demo: any 6-digit code is accepted.
-    window.setTimeout(() => router.push(`/portal/${role.id}`), 800);
+    try {
+      const res = await fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: otpValue }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        setError(data?.message ?? "Verification failed. Please try again.");
+        setVerifying(false);
+        return;
+      }
+      // Honour a ?next=/internal/path from the middleware redirect; ignore
+      // anything that isn't a safe same-site path.
+      const nextParam = new URLSearchParams(window.location.search).get("next");
+      const target =
+        nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+          ? nextParam
+          : `/portal/${role.id}`;
+      router.push(target);
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+      setVerifying(false);
+    }
   }
 
   function handleOtpChange(index: number, value: string) {
@@ -236,13 +287,6 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
   if (step === "phone") {
     return (
       <motion.div key="phone" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
-        <div className={cn("mt-6", noticeStyles)}>
-          <Info className="mt-0.5 size-4 shrink-0" />
-          <span>
-            Demo environment — no real SMS is sent. Enter any mobile number and we&apos;ll take you to the code step.
-          </span>
-        </div>
-
         <form onSubmit={sendOtp} className="mt-7 flex flex-col gap-5" noValidate>
           <div>
             <Label htmlFor="phone">Mobile number</Label>
@@ -257,7 +301,7 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
                 inputMode="tel"
                 required
                 autoComplete="tel"
-                placeholder="+1 555 010 2233"
+                placeholder="+91 90833 89670"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
                 className="pl-11"
@@ -312,12 +356,15 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
         </button>
       </div>
 
-      <div className={cn("mt-4", noticeStyles)}>
-        <Info className="mt-0.5 size-4 shrink-0" />
-        <span>
-          Demo — any 6-digit code works (e.g. <span className="font-semibold">123456</span>).
-        </span>
-      </div>
+      {devCode && (
+        <div className={cn("mt-4", noticeStyles)}>
+          <Info className="mt-0.5 size-4 shrink-0" />
+          <span>
+            Dev mode — no SMS provider configured. Your code is{" "}
+            <span className="font-semibold tracking-[0.3em]">{devCode}</span>.
+          </span>
+        </div>
+      )}
 
       <form onSubmit={verify} className="mt-6 flex flex-col gap-5" noValidate>
         <div className="flex justify-between gap-2" onPaste={handleOtpPaste}>

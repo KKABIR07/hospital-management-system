@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 
+import { prisma } from "@/lib/prisma";
 import { validateContact } from "@/lib/validation";
 
 /**
  * Contact form endpoint.
  *
- * Validates the submission server-side and (currently) logs it. Wire the
- * marked section to your email provider (Resend, SendGrid, SES…) or CRM to
- * make it live — the request/response contract stays the same.
+ * Validates the submission server-side, then persists it as a Contact record.
+ * Hook an email provider (Resend, SendGrid, SES…) or CRM in alongside the
+ * insert if you also want to notify staff — the request/response contract
+ * stays the same.
  */
 export async function POST(request: Request) {
   let json: unknown;
@@ -28,15 +30,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    // ---- Integration point ----------------------------------------------
-    // e.g. await sendEmail({ to: siteConfig.email, ...result.data })
-    //      await crm.createLead(result.data)
-    console.info("[contact] new enquiry", {
-      name: result.data!.name,
-      email: result.data!.email,
-      department: result.data!.department ?? "—",
+    await prisma.contact.create({
+      data: {
+        name: result.data!.name,
+        email: result.data!.email,
+        phone: result.data!.phone,
+        department: result.data!.department ?? null,
+        message: result.data!.message,
+      },
     });
-    // ---------------------------------------------------------------------
 
     return NextResponse.json({
       ok: true,
