@@ -12,8 +12,8 @@ import {
   EyeOff,
   Info,
   Lock,
+  Mail,
   Pencil,
-  Phone,
   ShieldCheck,
 } from "lucide-react";
 
@@ -141,27 +141,27 @@ function StaffCredentials({ role, accent }: { role: PortalRole; accent: Accent }
 }
 
 /* ------------------------------------------------------------------ *
- * Patient — phone number + real SMS OTP
- * (POST /api/auth/otp/request → /api/auth/otp/verify)
+ * Patient — email address + real one-time passcode
+ * (POST /api/auth/otp/email/request → /api/auth/otp/email/verify)
  * ------------------------------------------------------------------ */
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) {
   const router = useRouter();
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [phone, setPhone] = useState("");
+  const [step, setStep] = useState<"identity" | "otp">("identity");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
-  // Set only when the server runs without an SMS provider key (local dev).
+  // Set only when the server runs without an email provider key (local dev).
   const [devCode, setDevCode] = useState<string | null>(null);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
-  const phoneDigits = phone.replace(/\D/g, "");
-  const phoneValid = phoneDigits.length >= 7;
+  const emailValid = EMAIL_RE.test(email.trim());
   const otpValue = otp.join("");
   const otpValid = otpValue.length === OTP_LENGTH;
 
@@ -172,13 +172,13 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
     return () => window.clearInterval(timer);
   }, [seconds]);
 
-  /** Request (or resend) a code for the entered number. */
+  /** Request (or resend) a code for the entered email. */
   async function requestCode(): Promise<boolean> {
     try {
-      const res = await fetch("/api/auth/otp/request", {
+      const res = await fetch("/api/auth/otp/email/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ email }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
@@ -196,8 +196,8 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
   async function sendOtp(event?: React.FormEvent) {
     event?.preventDefault();
     if (sending) return;
-    if (!phoneValid) {
-      setError("Enter a valid mobile number.");
+    if (!emailValid) {
+      setError("Enter a valid email address.");
       return;
     }
     setError(null);
@@ -233,10 +233,10 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
     setError(null);
     setVerifying(true);
     try {
-      const res = await fetch("/api/auth/otp/verify", {
+      const res = await fetch("/api/auth/otp/email/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code: otpValue }),
+        body: JSON.stringify({ email, code: otpValue }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
@@ -284,31 +284,31 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
     inputsRef.current[Math.min(text.length, OTP_LENGTH - 1)]?.focus();
   }
 
-  if (step === "phone") {
+  if (step === "identity") {
     return (
-      <motion.div key="phone" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+      <motion.div key="identity" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
         <form onSubmit={sendOtp} className="mt-7 flex flex-col gap-5" noValidate>
           <div>
-            <Label htmlFor="phone">Mobile number</Label>
+            <Label htmlFor="email">Email address</Label>
             <div className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-0 grid w-11 place-items-center text-muted-foreground">
-                <Phone className="size-4.5" />
+                <Mail className="size-4.5" />
               </span>
               <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                inputMode="tel"
+                id="email"
+                name="email"
+                type="email"
+                inputMode="email"
                 required
-                autoComplete="tel"
-                placeholder="+91 90833 89670"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="pl-11"
               />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              We&apos;ll send a one-time code to verify it&apos;s you.
+              We&apos;ll email a one-time code to verify it&apos;s you.
             </p>
           </div>
 
@@ -341,12 +341,12 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
       <div className="mt-6 flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           Enter the 6-digit code sent to{" "}
-          <span className="font-semibold text-foreground">{phone || "your phone"}</span>
+          <span className="font-semibold text-foreground">{email || "your email"}</span>
         </p>
         <button
           type="button"
           onClick={() => {
-            setStep("phone");
+            setStep("identity");
             setError(null);
           }}
           className={cn("inline-flex shrink-0 items-center gap-1 text-sm font-semibold hover:underline", accent.text)}
@@ -360,7 +360,7 @@ function PatientOtpFlow({ role, accent }: { role: PortalRole; accent: Accent }) 
         <div className={cn("mt-4", noticeStyles)}>
           <Info className="mt-0.5 size-4 shrink-0" />
           <span>
-            Dev mode — no SMS provider configured. Your code is{" "}
+            Dev mode — no email provider configured. Your code is{" "}
             <span className="font-semibold tracking-[0.3em]">{devCode}</span>.
           </span>
         </div>

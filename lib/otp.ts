@@ -74,6 +74,18 @@ export function toLocalNumber(e164: string): string {
 }
 
 /**
+ * Normalise an email for use as an OTP login identity: trim + lowercase so the
+ * same address always maps to one challenge regardless of how it was typed.
+ * Returns `null` if the input doesn't look like an email address.
+ */
+export function normalizeEmail(raw: string): string | null {
+  if (typeof raw !== "string") return null;
+  const email = raw.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  return email;
+}
+
+/**
  * A cryptographically-random numeric code of `OTP_LENGTH` digits, zero-padded.
  * Uses the Web Crypto API available in the Node/Next runtime.
  */

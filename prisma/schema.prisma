@@ -161,19 +161,25 @@ model User {
   @@map("users")
 }
 
-/// A short-lived SMS one-time-passcode challenge. The code itself is never
-/// stored — only a bcrypt hash of it — so a database leak can't reveal live
-/// codes. Rows are matched by `phone` (E.164), expire after a few minutes, and
-/// are flagged `consumed` once used. `attempts` caps brute-force guessing.
+/// A short-lived one-time-passcode challenge for patient login. The code itself
+/// is never stored — only a bcrypt hash of it — so a database leak can't reveal
+/// live codes. A challenge is keyed by exactly one channel: `phone` (E.164, SMS)
+/// or `email` (lowercased). Rows expire after a few minutes and are flagged
+/// `consumed` once used; `attempts` caps brute-force guessing.
 ///
-/// `consumed` is a boolean (not a nullable timestamp) on purpose: on MongoDB a
-/// `{ field: null }` filter does not match documents where an optional field was
-/// never written, so a nullable "consumedAt" would make the "still-live" lookup
-/// silently miss fresh challenges. A defaulted boolean is always present and
-/// matches reliably. `consumedAt` keeps the audit timestamp.
+/// Both identity fields are optional so either channel can be used, but lookups
+/// always filter by a concrete value (a specific phone OR a specific email),
+/// never by `{ field: null }` — that matters because on MongoDB a `{ field: null }`
+/// filter does not match documents where an optional field was never written, so
+/// email rows (phone unset) and SMS rows (email unset) never collide.
+///
+/// `consumed` is a boolean (not a nullable timestamp) for the same reason: a
+/// defaulted boolean is always present and matches reliably in the "still-live"
+/// lookup. `consumedAt` keeps the audit timestamp.
 model OtpChallenge {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  phone      String
+  phone      String?
+  email      String?
   codeHash   String
   expiresAt  DateTime
   attempts   Int       @default(0)
@@ -182,6 +188,7 @@ model OtpChallenge {
   createdAt  DateTime  @default(now())
 
   @@index([phone])
+  @@index([email])
   @@index([expiresAt])
   @@map("otp_challenges")
 }

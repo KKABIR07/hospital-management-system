@@ -161,6 +161,41 @@ export function validateOtpVerify(input: unknown): ValidationResult<OtpVerifyPay
   };
 }
 
+export interface EmailOtpRequestPayload {
+  email: string;
+}
+
+export function validateEmailOtpRequest(input: unknown): ValidationResult<EmailOtpRequestPayload> {
+  const body = (input ?? {}) as Record<string, unknown>;
+  if (!isEmail(body.email)) {
+    return { success: false, errors: { email: "Enter a valid email address." } };
+  }
+  return { success: true, data: { email: (body.email as string).trim().toLowerCase() } };
+}
+
+export interface EmailOtpVerifyPayload {
+  email: string;
+  code: string;
+}
+
+export function validateEmailOtpVerify(input: unknown): ValidationResult<EmailOtpVerifyPayload> {
+  const errors: FieldErrors = {};
+  const body = (input ?? {}) as Record<string, unknown>;
+
+  if (!isEmail(body.email)) errors.email = "Enter a valid email address.";
+  // A 4–8 digit numeric code — the route enforces the exact length.
+  if (typeof body.code !== "string" || !/^\d{4,8}$/.test(body.code.trim())) {
+    errors.code = "Enter the code we sent you.";
+  }
+
+  if (Object.keys(errors).length > 0) return { success: false, errors };
+
+  return {
+    success: true,
+    data: { email: (body.email as string).trim().toLowerCase(), code: (body.code as string).trim() },
+  };
+}
+
 const APPOINTMENT_MODES = ["In-person", "Video consult", "Lab visit"] as const;
 type AppointmentModeInput = (typeof APPOINTMENT_MODES)[number];
 
